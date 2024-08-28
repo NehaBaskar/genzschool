@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -24,6 +26,8 @@ public class ProjectSecurityConfig {
                .authorizeHttpRequests((requests) -> requests.requestMatchers("/dashboard").authenticated()
                .requestMatchers("/displayMessages").hasRole("ADMIN")
                .requestMatchers("/closeMsg/**").hasRole("ADMIN")
+               .requestMatchers("/displayProfile").authenticated()
+               .requestMatchers("/updateProfile").authenticated()
                .requestMatchers("/","/home").permitAll()
                .requestMatchers("/holiday/**").permitAll()
                .requestMatchers("/contact").permitAll()
@@ -43,10 +47,15 @@ public class ProjectSecurityConfig {
         return http.build();
     }
 
-    @Bean
+   /* @Bean
     public InMemoryUserDetailsManager userDetailsService(){
         UserDetails admin = User.withDefaultPasswordEncoder().username("admin").password("12345").roles("ADMIN").build();
         UserDetails user = User.withDefaultPasswordEncoder().username("user").password("54321").roles("USER").build();
         return new InMemoryUserDetailsManager(user,admin);
+    }*/
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 }
