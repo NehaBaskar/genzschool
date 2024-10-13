@@ -110,7 +110,7 @@ public class AdminController {
 
     @RequestMapping("/displayCourses")
     public ModelAndView displayCourses(Model model){
-        List<Courses> courses = coursesRepository.findAll();
+        List<Courses> courses = coursesRepository.findByOrderByName();
         ModelAndView modelAndView = new ModelAndView("courses_secure.html");
         modelAndView.addObject("courses", courses);
         modelAndView.addObject("course", new Courses());
@@ -126,11 +126,48 @@ public class AdminController {
     }
 
     @GetMapping("/viewStudents")
-    public ModelAndView viewStudents(Model model, @RequestParam int id){
+    public ModelAndView viewStudents(Model model, @RequestParam int id,HttpSession session,
+                                     @RequestParam(value = "error", required = false)String error){
+        String  errorMessage = null;
         ModelAndView modelAndView = new ModelAndView("courses_students.html");
+        if(error != null){
+            errorMessage = "Invalid mail id !!!";
+            modelAndView.addObject("errorMessage", errorMessage);
+        }
         Optional<Courses> courses = coursesRepository.findById(id);
         modelAndView.addObject("courses", courses.get());
         modelAndView.addObject("person", new Person());
+        session.setAttribute("courses", courses.get());
+        return modelAndView;
+    }
+
+    @PostMapping("/addStudentToCourse")
+    public ModelAndView addStudentToCourse(Model model, @ModelAttribute("person")Person person, HttpSession session){
+        ModelAndView modelAndView = new ModelAndView();
+        Courses courses = (Courses) session.getAttribute("courses");
+        Person personEntity = personRepository.findByEmail(person.getEmail());
+        if(personEntity == null && !(personEntity.getPersonId() > 0)){
+            modelAndView.setViewName("redirect:/admin/viewStudents?id="+courses.getCourseId()+"&error=true");
+            return modelAndView;
+        }
+        personEntity.getCourses().add(courses);
+        courses.getPersons().add(personEntity);
+        personRepository.save(personEntity);
+        session.setAttribute("courses",courses);
+        modelAndView.setViewName("redirect:/admin/viewStudents?id="+courses.getCourseId());
+        return modelAndView;
+    }
+
+    @GetMapping("deleteStudentFromCourse")
+    public ModelAndView deleteStudentFromCourse(Model model,@RequestParam int personId, HttpSession session){
+        ModelAndView modelAndView = new ModelAndView();
+        Courses courses =(Courses) session.getAttribute("courses");
+        Optional<Person> person = personRepository.findById(personId);
+        person.get().getCourses().remove(courses);
+        courses.getPersons().remove(person.get());
+        personRepository.save(person.get());
+        session.setAttribute("courses", courses);
+        modelAndView.setViewName("redirect:/admin/viewStudents?id="+courses.getCourseId());
         return modelAndView;
     }
 

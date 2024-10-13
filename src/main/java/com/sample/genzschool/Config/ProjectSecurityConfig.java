@@ -24,11 +24,12 @@ public class ProjectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
        http.csrf((csrf) -> csrf.ignoringRequestMatchers("/saveForm").ignoringRequestMatchers("/public/**"))
                .authorizeHttpRequests((requests) -> requests.requestMatchers("/dashboard").authenticated()
-               .requestMatchers("/displayMessages").hasRole("ADMIN")
+               .requestMatchers("/displayMessages/**").hasRole("ADMIN")
                .requestMatchers("/admin/**").hasRole("ADMIN")
                .requestMatchers("/closeMsg/**").hasRole("ADMIN")
                .requestMatchers("/displayProfile").authenticated()
                .requestMatchers("/updateProfile").authenticated()
+               .requestMatchers("/student/**").hasRole("STUDENT")
                .requestMatchers("/","/home").permitAll()
                .requestMatchers("/holiday/**").permitAll()
                .requestMatchers("/contact").permitAll()

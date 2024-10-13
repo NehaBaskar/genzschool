@@ -7,6 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -38,19 +42,26 @@ public class ContactService {
         return isSaved;
     }
 
-    public List<Contact> findContactMsgswithStatusOpen() {
-        List<Contact> contactMsgs = contactRepository.findByStatus(GenZSchoolConstants.OPEN);
-        return contactMsgs;
+    public Page<Contact> findContactMsgswithStatusOpen(int pageNum, String sortField, String sortDir) {
+        int pageSize = 5;
+        Pageable pageable = PageRequest.of(pageNum-1, pageSize,
+                sortDir.equals("asc") ? Sort.by(sortField).ascending() : Sort.by(sortField).descending());
+        Page<Contact> msgPage = contactRepository.findByStatus(GenZSchoolConstants.OPEN, pageable);
+        return msgPage;
     }
 
     public boolean updateStatus(int id) {
         boolean isUpdated = false;
-        Optional<Contact> contact = contactRepository.findById(id);
+        /*Optional<Contact> contact = contactRepository.findById(id);
         contact.ifPresent(contact1 -> {
             contact1.setStatus(GenZSchoolConstants.CLOSE);
         });
         Contact updatedContact = contactRepository.save(contact.get());
         if(null != updatedContact && updatedContact.getUpdatedBy() != null){
+            isUpdated = true;
+        }  */
+        int rows = contactRepository.updateStatusById(GenZSchoolConstants.CLOSE, id);
+        if(rows > 0){
             isUpdated = true;
         }
         return  isUpdated;

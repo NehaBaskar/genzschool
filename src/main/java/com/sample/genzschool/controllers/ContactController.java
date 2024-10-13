@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,10 +59,19 @@ public class ContactController {
         return "redirect:/contact";
     }
 
-    @RequestMapping("/displayMessages")
-    public ModelAndView displayMessages(Model model){
-        List<Contact> contactMsgs = contactService.findContactMsgswithStatusOpen();
+    @RequestMapping("/displayMessages/page/{pageNum}")
+    public ModelAndView displayMessages(Model model,@PathVariable("pageNum")int pageNum,
+                                        @RequestParam("sortField") String sortField,
+                                        @RequestParam("sortDir") String sortDir){
+        Page<Contact> msgPages = contactService.findContactMsgswithStatusOpen(pageNum,sortField,sortDir);
+        List<Contact> contactMsgs = msgPages.getContent();
         ModelAndView modelAndView = new ModelAndView("message.html");
+        modelAndView.addObject("currentPage", pageNum);
+        modelAndView.addObject("totalPages",msgPages.getTotalPages());
+        modelAndView.addObject("totalMsgs",msgPages.getTotalElements());
+        modelAndView.addObject("sortField",sortField);
+        modelAndView.addObject("sortDir", sortDir);
+        modelAndView.addObject("reverseSortDir", sortDir.equals("asc") ? "desc" :"asc");
         modelAndView.addObject("contactMsgs", contactMsgs);
         return modelAndView;
     }
@@ -69,7 +79,7 @@ public class ContactController {
     @RequestMapping(value = "/closeMsg", method= RequestMethod.GET)
     public String closeMsgStatus(@RequestParam int id ){
        contactService.updateStatus(id);
-       return "redirect:/displayMessages";
+       return "redirect:/displayMessages/page/1?sortField=name&sortDir=desc";
     }
 }
 
