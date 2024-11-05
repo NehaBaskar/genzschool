@@ -22,16 +22,23 @@ public class ProjectSecurityConfig {
     //Permits all requests in web application
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-       http.csrf((csrf) -> csrf.ignoringRequestMatchers("/saveForm").ignoringRequestMatchers("/public/**"))
+       http.csrf((csrf) -> csrf.ignoringRequestMatchers("/saveForm").ignoringRequestMatchers("/public/**")
+               .ignoringRequestMatchers("/api/**").ignoringRequestMatchers("/data-api/**"))
                .authorizeHttpRequests((requests) -> requests.requestMatchers("/dashboard").authenticated()
                .requestMatchers("/displayMessages/**").hasRole("ADMIN")
                .requestMatchers("/admin/**").hasRole("ADMIN")
                .requestMatchers("/closeMsg/**").hasRole("ADMIN")
+               .requestMatchers("/api/**").authenticated()
+               .requestMatchers("/data-api/**").authenticated()
                .requestMatchers("/displayProfile").authenticated()
                .requestMatchers("/updateProfile").authenticated()
                .requestMatchers("/student/**").hasRole("STUDENT")
                .requestMatchers("/","/home").permitAll()
                .requestMatchers("/holiday/**").permitAll()
+               .requestMatchers("/profile/**").permitAll()
+               /*.requestMatchers("/data-api/**").permitAll()
+               .requestMatchers("/courseses/**").permitAll()
+               .requestMatchers("/contacts/**").permitAll()*/
                .requestMatchers("/contact").permitAll()
                .requestMatchers("/saveForm").permitAll()
                .requestMatchers("/courses").permitAll()

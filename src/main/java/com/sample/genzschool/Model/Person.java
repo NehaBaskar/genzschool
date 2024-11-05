@@ -1,5 +1,6 @@
 package com.sample.genzschool.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sample.genzschool.customAnnotations.FieldsValueMatch;
 import com.sample.genzschool.customAnnotations.PasswordValidator;
 import jakarta.persistence.*;
@@ -52,16 +53,19 @@ public class Person extends BaseEntity{
     @NotBlank(message = "Email should not be blank")
     @Email(message = "Please provide valid email address")
     @Transient
+    @JsonIgnore
     private String confirmEmail;
 
     @NotBlank(message = "Password should not be blank")
     @Size(min = 5, message = "Password must be atleast five characters long")
     @PasswordValidator
+    @JsonIgnore
     private String pwd;
 
     @NotBlank(message = "Password should not be blank")
     @Size(min = 5, message = "Password must be atleast five characters long")
     @Transient
+    @JsonIgnore
     private String confirmPwd;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST, targetEntity = Roles.class)
